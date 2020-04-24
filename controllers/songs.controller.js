@@ -17,20 +17,21 @@ const getAllSongs = (req, res, next) => {
 };
 
 const findById = async input => {
-  const filteredSong = await Song.find({ songId: input });
+  const filteredSong = await Song.findOne({ songId: input });
   return filteredSong;
 };
 
 const getOneSong = (req, res, next) => {
   findById(req.params.songId)
     .then(data => {
-      if (Object.keys(data).length !== 0) {
+      if (data !== null) {
         res.json(data);
       } else {
         const err = new Error(
           "Unable to fetch songs due to id not found in songlist"
         );
         err.statusCode = 404;
+        next(err);
       }
     })
     .catch(err => next(err));
@@ -83,7 +84,15 @@ const replaceOneSong = (req, res, next) => {
       { name: putContent.name, artist: putContent.artist }
     )
       .then(data => {
-        res.json(data);
+        if (data !== null) {
+          res.json(data);
+        } else {
+          const err = new Error(
+            "Unable to fetch songs due to id not found in songlist"
+          );
+          err.statusCode = 404;
+          next(err);
+        }
       })
       .catch(err => next(err));
   }

@@ -4,17 +4,26 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "express": "^4.17.1",
     "jest": "^25.4.0",
     "mongoose": "^5.9.10",
     "nodemon": "^2.0.3",
     "supertest": "^4.0.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mongodb-memory-server": "^6.5.2"
+  },
   "scripts": {
     "test": "jest",
+    "testc": "jest --coverage",    
     "start": "node index.js",
     "start:dev": "nodemon index.js"
+  },
+  "jest": {
+    "globalSetup": "./test/setup.js",
+    "globalTeardown": "./test/teardown.js",
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "",
