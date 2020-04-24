@@ -1,0 +1,90 @@
+const express = require("express");
+const router = express.Router();
+const Joi = require("@hapi/joi");
+
+const songs = [];
+
+const requireJsonContent = (req, res, next) => {
+  if (req.headers["content-type"] !== "application/json") {
+    res.status(400).send("Server wants application/json!");
+  } else {
+    next();
+  }
+};
+
+router.get("", (req, res) => {
+  res.json(songs);
+});
+
+router.get("/:songId", (req, res) => {
+  if (songs[req.params.songId - 1]) {
+    res.json(songs[req.params.songId - 1]);
+    //res.json(req.song);
+  } else {
+    res
+      .status(404)
+      .send("Unable to fetch songs due to id not found in songlist");
+  }
+});
+
+const songSchema = Joi.object({
+  name: Joi.string()
+    .min(3)
+    .max(30) //at least 3 characters long but no more than 30
+    .required(),
+
+  artist: Joi.string()
+    .min(3)
+    .max(30) //at least 3 characters long but no more than 30
+    .required()
+});
+
+router.post("", requireJsonContent, (req, res, next) => {
+  const postContent = req.body;
+  const result = songSchema.validate(postContent);
+  if (result.error) {
+    console.log("The data is invalid");
+    const err = new Error(result.error.details[0].message);
+    err.statusCode = 400;
+    next(err);
+    //note that we should not have any more processing after calling next(err)
+  } else {
+    console.log("The data is valid!!");
+    const id = songs.length + 1;
+    postContent.id = id;
+    songs.push(postContent);
+    res.status(201).json(postContent);
+  }
+
+  // songs.push(req.song);
+  // res.status(201).json(req.song);
+});
+
+router.put("/:songId", requireJsonContent, (req, res) => {
+  const putContent = req.body;
+  const songIdKey = Number(req.params.songId);
+  if (typeof songIdKey === "number" && songs.length >= songIdKey) {
+    const arrayIndex = songIdKey - 1;
+    for (const key in putContent) {
+      songs[arrayIndex][key] = putContent[key];
+    }
+    res.json(songs[arrayIndex]);
+  } else {
+    res
+      .status(404)
+      .send("Unable to modify songs due to id not found in songlist");
+  }
+});
+
+router.delete("/:songId", (req, res) => {
+  const songIdKey = Number(req.params.songId);
+  const arrayIndex = songIdKey - 1;
+  if (typeof songIdKey === "number" && songs.length >= songIdKey) {
+    res.json(songs[arrayIndex]);
+    songs.splice(arrayIndex, 1);
+  } else {
+    res.json(songs[arrayIndex]);
+  }
+});
+
+module.exports = router;

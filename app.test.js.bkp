@@ -1,0 +1,90 @@
+const request = require("supertest");
+const app = require("./app");
+
+describe("/movies", () => {
+
+});
+
+describe("/songs", () => {
+
+  // beforeEach(async () => {
+  // await request(app)
+  // .post("/songs")
+  // .send("This is not json!");
+  // });
+
+  it("POST /songs respond with status 400 and correct string when sending non-json", async () => {
+    const { text } = await request(app)
+      .post("/songs")
+      .send("This is not json!")
+      .expect(400);
+    expect(text).toEqual("Server wants application/json!");
+  });
+
+  it("POST /songs should add a song and return a new song object", async () => {
+    const newSong = { name: "test movie", artist: "rhianna" };
+    const expectedSong = { id: 1, name: "test movie", artist: "rhianna" };
+
+    const { body: actualSong } = await request(app)
+      .post("/songs")
+      .send(newSong)
+      .expect(201);
+
+    expect(actualSong).toEqual(expectedSong);
+  });
+
+  it("GET /songs/:id should return the correct song", async () => {
+    const expectedSong = { id: 1, name: "test movie", artist: "rhianna" };
+    const { body: actualSong } = await request(app)
+      .get("/songs/1")
+      .expect(200);
+    expect(actualSong).toEqual(expectedSong);
+  });
+
+  it("GET /songs should return an array of songs", async () => {
+    const expectedSong = [{ id: 1, name: "test movie", artist: "rhianna" }];
+    const { body: actualSong } = await request(app)
+      .get("/songs")
+      .expect(200);
+    expect(actualSong).toEqual(expectedSong);
+  });
+
+  it("PUT /songs/:id should modify existing song and return a new song object", async () => {
+    const newSong = { name: "test movie 2", artist: "rhianna" };
+    const expectedSong = { id: 1, name: "test movie 2", artist: "rhianna" };
+
+    const { body: actualSong } = await request(app)
+      .put("/songs/1")
+      .send(newSong)
+      .expect(200);
+
+    expect(actualSong).toEqual(expectedSong);
+  });
+
+  it("DELETE /songs/:id should remove song and return a new song object", async () => {
+    const expectedSong = { id: 1, name: "test movie 2", artist: "rhianna" };
+    const { body: actualSong } = await request(app)
+      .delete("/songs/1")
+      .expect(200);
+    expect(actualSong).toEqual(expectedSong);
+  });
+
+  it("GET /songs/:id should return 404 when songid does not exist", async () => {
+    const { text } = await request(app)
+      .get("/songs/1")
+      .expect(404);
+    expect(text).toEqual(
+      "Unable to fetch songs due to id not found in songlist"
+    );
+  });
+
+  it("PUT /songs/:id should return 404 when songid does not exist", async () => {
+    const { text } = await request(app)
+      .put("/songs/1")
+      .send({ thisIsJson: "json!" })
+      .expect(404);
+    expect(text).toEqual(
+      "Unable to modify songs due to id not found in songlist"
+    );
+  });
+});
