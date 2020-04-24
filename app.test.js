@@ -1,7 +1,7 @@
 const request = require("supertest");
 const app = require("./app");
-//const Song = require("./models/simpleSong.model");
 const { teardownMongoose } = require("./test/mongoose");
+const SongModel = require("./models/simpleSong.model");
 
 describe("/songs", () => {
   afterAll(async () => await teardownMongoose());
@@ -32,7 +32,7 @@ describe("/songs", () => {
       .get("/songs")
       .expect(200);
     expect(actualSong).toMatchObject(expectedSong);
-  });  
+  });
 
   it("POST /songs should add a song with a new id", async () => {
     const newSong = { name: "test 2", artist: "rhianna" };
@@ -102,5 +102,25 @@ describe("/songs", () => {
       .post("/songs")
       .send({ nonsenseKey: "test movie 2", artist: "rhianna" })
       .expect(400);
+  });
+
+  it("POST /songs should return 500 when client input is a duplicate", async () => {
+    await request(app)
+      .post("/songs")
+      .send({ name: "test 2", artist: "rhianna" })
+      .expect(500);
+  });
+
+  it("PUT /songs should return 500 when client input is a duplicate", async () => {
+    const origSongModelFindOneAndUpdate = SongModel.findOneAndUpdate;
+    SongModel.findOneAndUpdate = jest.fn();
+    SongModel.findOneAndUpdate.mockImplementationOnce(()=> {
+      const err = new Error();
+      throw err;
+    });
+    await request(app)
+      .put("/songs/3")
+      .send({ name: "test 2", artist: "rhianna" })
+      .expect(500);
   });
 });
