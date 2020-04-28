@@ -5,8 +5,12 @@
   "main": "index.js",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jest": "^25.4.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.10",
     "nodemon": "^2.0.3",
     "supertest": "^4.0.2"
@@ -16,7 +20,7 @@
   },
   "scripts": {
     "test": "jest",
-    "testc": "jest --coverage",    
+    "testc": "jest --coverage",
     "start": "node index.js",
     "start:dev": "nodemon index.js"
   },
