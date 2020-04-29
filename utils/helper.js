@@ -34,6 +34,10 @@ const protectRoute = (req, res, next) => {
       throw new Error("You are not authorized");
     }
     req.user = jwt.verify(req.cookies.token, process.env.JWT_SECRET_KEY);
+    console.log("Output of JWT VERIFY is :", req.user );
+    if (req.params.username && req.user.name !== req.params.username) {
+      throw new Error("You are not authorized");
+    }
     next();
   } catch (err) {
     err.statusCode = 401;

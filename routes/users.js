@@ -54,7 +54,7 @@ router.get("/:username", protectRoute, async (req, res, next) => {
   try {
     const username = req.params.username;
     const regex = new RegExp(username, "gi");
-    const users = await User.find({ username: regex });
+    const users = await User.find({ username: regex }, 'username').select('-_id');    
     res.send(users);
   } catch (err) {
     next(err);
