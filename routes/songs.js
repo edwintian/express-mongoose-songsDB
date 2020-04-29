@@ -8,15 +8,15 @@ const {
   replaceOneSong,
   removeOneSong
 } = require("../controllers/songs.controller");
-const {protectRoute} = require("../utils/helper");
+//const {protectRoute} = require("../utils/helper");
 
 router.get("", getAllSongs);
 
 router.get("/:songId", getOneSong);
 
-router.delete("/:songId", protectRoute, removeOneSong);
+router.delete("/:songId", removeOneSong);
 
-router.put("/:songId", protectRoute, requireJsonContent, replaceOneSong);
+router.put("/:songId", requireJsonContent, replaceOneSong);
 
 router.post("", requireJsonContent, createOneSong);
 
