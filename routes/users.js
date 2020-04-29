@@ -15,7 +15,9 @@ router.post("/login", async (req, res, next) => {
     const result = await bcrypt.compare(password, user.password);
 
     if (!result) {
-      throw new Error("Login failed");
+      const err = new Error("Bad Request");
+      err.statusCode = 400;
+      throw err;
     }
 
     const token = createJWTToken(user.username);
@@ -54,7 +56,7 @@ router.get("/:username", protectRoute, async (req, res, next) => {
   try {
     const username = req.params.username;
     const regex = new RegExp(username, "gi");
-    const users = await User.find({ username: regex }, 'username').select('-_id');    
+    const users = await User.find({ username: regex }, 'username').select('-_id');
     res.send(users);
   } catch (err) {
     next(err);

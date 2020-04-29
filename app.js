@@ -8,8 +8,8 @@ app.use(cookieParser());
 
 app.use(function (req, res, next) {
   // Cookies that have not been signed
-  console.log('Cookies: ', req.cookies);
-  console.log('Signed Cookies: ', req.signedCookies);  
+  // console.log('Cookies: ', req.cookies);
+  // console.log('Signed Cookies: ', req.signedCookies);
   next();
 })
 
