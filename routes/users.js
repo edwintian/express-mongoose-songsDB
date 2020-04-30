@@ -60,7 +60,7 @@ router.get("/:username", protectRoute, async (req, res, next) => {
     const users = await User.find({ username: regex }, 'username').select('-_id');
     res.send(users);
   } catch (err) {
-    next(err);
+          next(err);
   }
 });
 

@@ -13,7 +13,8 @@ describe("users route", () => {
   beforeEach(async () => {
     await User.create(userData);
     signedInAgent = request.agent(app);
-    await signedInAgent.post("/users/login").send(userData);
+    const something = await signedInAgent.post("/users/login").send(userData);
+    //console.log(something);
   });
 
   afterEach(async () => {
