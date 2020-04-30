@@ -4,7 +4,7 @@ const app = express();
 const cookieParser = require("cookie-parser");
 // parse req.body as a json object
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser("notagoodsecret"));
 
 app.use(function (req, res, next) {
   // Cookies that have not been signed

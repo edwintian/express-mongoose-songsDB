@@ -31,6 +31,7 @@ router.post("/login", async (req, res, next) => {
       expires: expiryDate,
       httpOnly: true, // client-side js cannot access cookie info
       //secure: true, // use HTTPS
+      signed: true,
     });
 
     res.send("You are now logged in!");

@@ -31,21 +31,15 @@ const requireJsonContent = (req, res, next) => {
 const protectRoute = (req, res, next) => {
   try {
     //no token check
-    if (!req.cookies.token) {
+    if (!req.signedCookies.token) {
       const err = new Error("You are not authorized");
       err.statusCode = 401;
       throw err;
     }
     req.user = jwt.verify(req.cookies.token, process.env.JWT_SECRET_KEY);
-    //invalid token
-    if (!req.user.name) {
-      const err = new Error("You are not authorized");
-      err.statusCode = 401;
-      throw err;
-    }
+    //invalid user check
     if (
       req.params.username &&
-      req.user.name &&
       req.user.name !== req.params.username
     ) {
       const err = new Error("Forbidden");
@@ -54,7 +48,7 @@ const protectRoute = (req, res, next) => {
     }
     next();
   } catch (err) {
-    // this means jwt.verify did not work
+    // jwt.verify threw error, meaning invalid token
     if (!err.statusCode) {
       err.statusCode = 401;
     }

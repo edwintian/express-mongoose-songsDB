@@ -4,10 +4,18 @@ const request = require("supertest");
 const app = require("../app");
 const { teardownMongoose } = require("../test/mongoose");
 const jwt = require("jsonwebtoken");
+let signedInAgent;
 
 describe("users route", () => {
+
   afterAll(async () => await teardownMongoose());
-  beforeEach(async () => await User.create(userData));
+
+  beforeEach(async () => {
+    await User.create(userData);
+    signedInAgent = request.agent(app);
+    await signedInAgent.post("/users/login").send(userData);
+  });
+
   afterEach(async () => {
     await User.deleteMany();
     jest.resetAllMocks();
@@ -32,7 +40,7 @@ describe("users route", () => {
     const expectedUserName = username;
     jwt.verify = jest.fn();
     jwt.verify.mockReturnValueOnce({ name: expectedUserName });
-    const { body: actualUser } = await request(app)
+    const { body: actualUser } = await signedInAgent
       .get(`/users/${expectedUserName}`)
       .set("Cookie", "token=dummy-token")
       .expect(200);
@@ -45,7 +53,7 @@ describe("users route", () => {
     const expectedUserName = "wrongUser";
     jwt.verify = jest.fn();
     jwt.verify.mockReturnValueOnce({ name: "ash3" });
-    const { body: actualUser } = await request(app)
+    const { body: actualUser } = await signedInAgent
       .get(`/users/${expectedUserName}`)
       .set("Cookie", "token=dummy-token")
       .expect(403);
@@ -63,15 +71,12 @@ describe("users route", () => {
   });
 
   it("5) GET should respond with 401 Unauthorized when token is invalid", async () => {
-    // jwt.verify.mockImplementationOnce(() => {
-    //     return {};
-    // });
     jwt.verify.mockImplementationOnce(() => {
-         throw new Error();
+      throw new Error();
     });
     const { password } = userData;
     const userName = "ash3";
-    const { body: actualUser } = await request(app)
+    const { body: actualUser } = await signedInAgent
       .get(`/users/${userName}`)
       .set("Cookie", "token=invalid")
       .expect(401);
@@ -88,7 +93,7 @@ describe("users route", () => {
       .post("/users/login")
       .send(expectedUser)
       .expect(200);
-      expect(text).toEqual("You are now logged in!");
+    expect(text).toEqual("You are now logged in!");
   });
 
   it("7) POST should not log user in when password is incorrect", async () => {
@@ -101,7 +106,7 @@ describe("users route", () => {
       .post("/users/login")
       .send(expectedUser)
       .expect(400);
-      expect(text).toEqual("Error: Bad Request");
+    expect(text).toEqual("Error: Bad Request");
   });
 
   it("8) POST should display logout message to useras expected", async () => {
@@ -110,10 +115,11 @@ describe("users route", () => {
       username,
       password: "nonsense"
     };
-    const { text } = await request(app)
+    const response = await request(app)
       .post("/users/logout")
       .send(expectedUser)
       .expect(200);
-      expect(text).toEqual("You are now logged out!");
+    expect(response.text).toEqual("You are now logged out!");
+    expect(response.headers["set-cookie"][0]).toMatch(/^token=/);
   });
 });
