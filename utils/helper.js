@@ -31,12 +31,13 @@ const requireJsonContent = (req, res, next) => {
 const protectRoute = (req, res, next) => {
   try {
     //no token check
-    if (!req.signedCookies.token) {
+    const jwtCookie = req.signedCookies.token;
+    if (!jwtCookie) {
       const err = new Error("You are not authorized");
       err.statusCode = 401;
       throw err;
     }
-    req.user = jwt.verify(req.cookies.token, process.env.JWT_SECRET_KEY);
+    req.user = jwt.verify(jwtCookie, process.env.JWT_SECRET_KEY);
     //invalid user check
     if (
       req.params.username &&
